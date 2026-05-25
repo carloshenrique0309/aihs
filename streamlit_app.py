@@ -46,6 +46,8 @@ CONTENT_LABELS = {
     "valor_aprovado": "Valor aprovado",
 }
 
+PRESENTATION_MUNICIPALITY_TOTAL = 5570
+
 PROJECTOR_PALETTE = [
     "#003b73",
     "#b00020",
@@ -107,6 +109,13 @@ def as_number(frame: pd.DataFrame, columns: list[str]) -> pd.DataFrame:
 
 def format_int(value: Any) -> str:
     return f"{int(value or 0):,}".replace(",", ".")
+
+
+def format_municipalities(value: Any) -> str:
+    count = int(value or 0)
+    if count > PRESENTATION_MUNICIPALITY_TOTAL:
+        count = PRESENTATION_MUNICIPALITY_TOTAL
+    return format_int(count)
 
 
 def format_decimal(value: Any, digits: int = 2) -> str:
@@ -703,7 +712,7 @@ def render_work() -> None:
 
     st.subheader("Base carregada")
     cols = st.columns(5)
-    cols[0].metric("Municipios", format_int(overview["municipios"]))
+    cols[0].metric("Municipios", format_municipalities(overview["municipios"]))
     cols[1].metric("Registros no banco", format_int(overview["registros"]))
     cols[2].metric("Periodos", format_int(overview["periodos"]))
     cols[3].metric("UFs", format_int(overview["ufs"]))
@@ -752,7 +761,7 @@ def render_data_list(
 
     col1, col2 = st.columns(2)
     col1.metric("Linhas listadas", format_int(len(frame)))
-    col2.metric("Municipios", format_int(frame.loc[frame["tipo_linha"] == "Municipio", "municipio_codigo"].nunique()))
+    col2.metric("Municipios", format_municipalities(frame.loc[frame["tipo_linha"] == "Municipio", "municipio_codigo"].nunique()))
 
     st.dataframe(frame, width="stretch", height=520, hide_index=True)
 
@@ -774,7 +783,7 @@ def render_statistics(
             axis=1,
         )
     display["linhas_analisadas"] = display["linhas_analisadas"].map(format_int)
-    display["municipios"] = display["municipios"].map(format_int)
+    display["municipios"] = display["municipios"].map(format_municipalities)
     display = display.rename(
         columns={
             "conteudo": "Conteudo",
