@@ -5,3 +5,6 @@ __pycache__/
 .env
 tools/
 data/
+etl_sih_datasus_postgres.py
+streamlitchat_app.py
+requirementsc.txt
