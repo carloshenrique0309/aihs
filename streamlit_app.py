@@ -281,7 +281,7 @@ def stored_data(
             municipio_nome,
             municipio_uf,
             case
-                when {REAL_MUNICIPALITY_SQL} then 'Municipio'
+                when {REAL_MUNICIPALITY_SQL} then 'Município'
                 else 'Ignorado/exterior'
             end as tipo_linha,
             total_linha as total
@@ -653,7 +653,7 @@ def render_header() -> None:
         """
         <section class="hero">
             <div class="eyebrow">SIH/SUS DATASUS</div>
-            <h1>Producao Hospitalar por Municipio</h1>
+            <h1>Produção Hospitalar por Município</h1>
         </section>
         """,
         unsafe_allow_html=True,
@@ -665,56 +665,56 @@ def render_work() -> None:
 
     st.subheader("Sobre o trabalho")
     st.write(
-        "Este projeto utiliza dados publicos do SUS disponibilizados no portal DATASUS. "
-        "A base escolhida foi a Producao Hospitalar do SIH/SUS, com dados detalhados de AIH "
-        "por local de internacao, abrangendo municipios do Brasil no periodo de janeiro/2024 "
+        "Este projeto utiliza dados públicos do SUS disponibilizados no portal DATASUS. "
+        "A base escolhida foi a Produção Hospitalar do SIH/SUS, com dados detalhados de AIH "
+        "por local de internação, abrangendo municípios do Brasil no período de janeiro/2024 "
         "a janeiro/2026."
     )
     st.write(
-        "Os dados foram extraidos automaticamente, limpos para padronizar municipios, periodos "
-        "e valores numericos, e depois carregados em um banco PostgreSQL. A aplicacao consulta "
-        "esse banco para apresentar uma lista dos registros, estatisticas descritivas e graficos "
-        "sobre quantidade aprovada, valor aprovado, UFs, municipios e subgrupos de procedimento."
+        "Os dados foram extraídos automaticamente, limpos para padronizar municípios, períodos "
+        "e valores numéricos, e depois carregados em um banco PostgreSQL. A aplicação consulta "
+        "esse banco para apresentar uma lista dos registros, estatísticas descritivas e gráficos "
+        "sobre quantidade aprovada, valor aprovado, UFs, municípios e subgrupos de procedimento."
     )
 
     st.markdown(
         """
         <div class="note">
-            <strong>Fonte dos dados:</strong> DATASUS / TabNet, SIH/SUS - Producao Hospitalar,
-            Dados Detalhados de AIH, por local de internacao. As linhas "Ignorado/exterior"
-            foram mantidas no banco para preservar a extracao original, mas nao entram na
-            contagem de municipios apresentada no painel.
+            <strong>Fonte dos dados:</strong> DATASUS / TabNet, SIH/SUS - Produção Hospitalar,
+            Dados Detalhados de AIH, por local de internação. As linhas "Ignorado/exterior"
+            foram mantidas no banco para preservar a extração original, mas não entram na
+            contagem de municípios apresentada no painel.
         </div>
         """,
         unsafe_allow_html=True,
     )
 
-    st.subheader("O que sera analisado")
+    st.subheader("O que será analisado")
     left, right = st.columns(2)
     with left:
         st.markdown(
             """
             - Lista dos dados armazenados no banco
-            - Estatisticas descritivas da quantidade aprovada
-            - Estatisticas descritivas do valor aprovado
-            - Evolucao mensal entre 2024 e 2026
+            - Estatísticas descritivas da quantidade aprovada
+            - Estatísticas descritivas do valor aprovado
+            - Evolução mensal entre 2024 e 2026
             """
         )
     with right:
         st.markdown(
             """
-            - Comparacao dos totais por UF
-            - Ranking dos municipios com maiores totais
+            - Comparação dos totais por UF
+            - Ranking dos municípios com maiores totais
             - Ranking dos subgrupos de procedimento
-            - Comparacao entre quantidade aprovada e valor aprovado
+            - Comparação entre quantidade aprovada e valor aprovado
             """
         )
 
     st.subheader("Base carregada")
     cols = st.columns(5)
-    cols[0].metric("Municipios", format_municipalities(overview["municipios"]))
+    cols[0].metric("Municípios", format_municipalities(overview["municipios"]))
     cols[1].metric("Registros no banco", format_int(overview["registros"]))
-    cols[2].metric("Periodos", format_int(overview["periodos"]))
+    cols[2].metric("Períodos", format_int(overview["periodos"]))
     cols[3].metric("UFs", format_int(overview["ufs"]))
     cols[4].metric("Subgrupos", format_int(overview["subgrupos"]))
 
@@ -728,18 +728,18 @@ def render_filters() -> tuple[str | None, int | None, date | None, date | None]:
 
     periods = period_options()
     period_labels = periods["periodo_rotulo"].tolist()
-    selected_start = start_col.selectbox("Periodo inicial", period_labels, index=0)
-    selected_end = end_col.selectbox("Periodo final", period_labels, index=len(period_labels) - 1)
+    selected_start = start_col.selectbox("Período inicial", period_labels, index=0)
+    selected_end = end_col.selectbox("Período final", period_labels, index=len(period_labels) - 1)
     start_period = periods.loc[periods["periodo_rotulo"] == selected_start, "periodo"].iloc[0]
     end_period = periods.loc[periods["periodo_rotulo"] == selected_end, "periodo"].iloc[0]
 
     if start_period > end_period:
-        st.warning("O periodo inicial ficou depois do periodo final. Ajustei o intervalo automaticamente.")
+        st.warning("O período inicial ficou depois do período final. Ajustei o intervalo automaticamente.")
         start_period, end_period = end_period, start_period
 
     municipalities = municipality_options(uf)
     municipality_labels = ["Todos"] + municipalities["municipio_label"].tolist()
-    selected_municipality = municipality_col.selectbox("Municipio", municipality_labels)
+    selected_municipality = municipality_col.selectbox("Município", municipality_labels)
 
     municipality_code = None
     if selected_municipality != "Todos":
@@ -761,7 +761,7 @@ def render_data_list(
 
     col1, col2 = st.columns(2)
     col1.metric("Linhas listadas", format_int(len(frame)))
-    col2.metric("Municipios", format_municipalities(frame.loc[frame["tipo_linha"] == "Municipio", "municipio_codigo"].nunique()))
+    col2.metric("Municípios", format_municipalities(frame.loc[frame["tipo_linha"] == "Município", "municipio_codigo"].nunique()))
 
     st.dataframe(frame, width="stretch", height=520, hide_index=True)
 
@@ -772,8 +772,8 @@ def render_statistics(
     start_period: date | None = None,
     end_period: date | None = None,
 ) -> None:
-    st.subheader("Estatisticas descritivas")
-    st.caption("Estatisticas calculadas sobre os municipios, sem as linhas Ignorado/exterior.")
+    st.subheader("Estatísticas descritivas")
+    st.caption("Estatísticas calculadas sobre os municípios, sem as linhas Ignorado/exterior.")
     stats = descriptive_stats(uf, municipality_code, start_period, end_period)
 
     display = stats.copy()
@@ -786,13 +786,13 @@ def render_statistics(
     display["municipios"] = display["municipios"].map(format_municipalities)
     display = display.rename(
         columns={
-            "conteudo": "Conteudo",
+            "conteudo": "Conteúdo",
             "linhas_analisadas": "Linhas analisadas",
-            "municipios": "Municipios",
+            "municipios": "Municípios",
             "total": "Total",
-            "media": "Media",
-            "minimo": "Minimo",
-            "maximo": "Maximo",
+            "media": "Média",
+            "minimo": "Mínimo",
+            "maximo": "Máximo",
         }
     )
     st.dataframe(display, width="stretch", hide_index=True)
@@ -851,8 +851,8 @@ def render_line_chart(
         x="periodo_label",
         y="total",
         markers=True,
-        title=f"Evolucao mensal - {label}",
-        labels={"periodo_label": "Periodo", "total": label},
+        title=f"Evolução mensal - {label}",
+        labels={"periodo_label": "Período", "total": label},
         color_discrete_sequence=[line_color],
     )
     fig.update_traces(line=dict(width=4), marker=dict(size=8))
@@ -875,8 +875,8 @@ def render_top_municipality_chart(
         y="municipio",
         orientation="h",
         color="municipio_uf",
-        title=f"Top 15 municipios - {label}",
-        labels={"total": label, "municipio": "Municipio", "municipio_uf": "UF"},
+        title=f"Top 15 municípios - {label}",
+        labels={"total": label, "municipio": "Município", "municipio_uf": "UF"},
         color_discrete_sequence=PROJECTOR_PALETTE,
     )
     style_projector_chart(fig, 480)
@@ -932,8 +932,8 @@ def render_charts(
     start_period: date | None = None,
     end_period: date | None = None,
 ) -> None:
-    st.subheader("Graficos")
-    st.caption("Graficos usando os filtros selecionados e todos os periodos carregados no banco.")
+    st.subheader("Gráficos")
+    st.caption("Gráficos usando os filtros selecionados e todos os períodos carregados no banco.")
 
     left, right = st.columns(2)
     with left:
@@ -966,8 +966,8 @@ def main() -> None:
     render_header()
 
     section = st.radio(
-        "Secao do painel",
-        ["Trabalho", "Lista dos dados", "Estatisticas", "Graficos"],
+        "Seção do painel",
+        ["Trabalho", "Lista dos dados", "Estatísticas", "Gráficos"],
         horizontal=True,
         label_visibility="collapsed",
     )
@@ -978,7 +978,7 @@ def main() -> None:
         uf, municipality_code, start_period, end_period = render_filters()
         if section == "Lista dos dados":
             render_data_list(uf, municipality_code, start_period, end_period)
-        elif section == "Estatisticas":
+        elif section == "Estatísticas":
             render_statistics(uf, municipality_code, start_period, end_period)
         else:
             render_charts(uf, municipality_code, start_period, end_period)
